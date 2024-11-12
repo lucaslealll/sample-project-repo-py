@@ -1,0 +1,53 @@
+#!/bin/bash
+# == ==================================================================================================================== == #
+# == >>>>>>>>>>>>>>>>> JUST ADAPT THESE 6 ROWS BELOW. DON'T NEED TO CHANGE THE OTHERS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< == #
+PROJECT="Project Name"                                             # Project name                                         == #
+SCRIPT="Script Title"                                              # Project or script description (TED Spreadsheet)      == #
+SCRIPT_NAME="script_name.py"                                       # Name of the Python script                            == #
+SCRIPT_BASE_DIR="path/to/your/script/directory"                    # Base directory for the script                        == #
+PROJECT_DIR="/path/to/your/project"                                # Root directory for the project                       == #
+PYTHON_ENV="/path/python/environment/activate"                     # Path to Python virtual environment activation script == #
+# == ==================================================================================================================== == #
+# == ==================================================================================================================== == #
+
+MAIN_DIR="$PROJECT_DIR/$SCRIPT_BASE_DIR"          # Full path to the main script directory
+SCRIPT_PATH="$PROJECT_DIR/scripts/$SCRIPT_NAME"   # Full path to the Python script
+
+# Print a header with project name, script, and current date
+echo -e "\n\n========== $(date) - $PROJECT - $SCRIPT ==========\n"
+
+{ # try
+    # Clear cache and tmp
+    echo -e "\033[1;32m[INFO]\033[0m Starting cache and tmp clearing..."
+    echo 3 >/proc/sys/vm/drop_caches
+    echo -e "\033[1;32m[INFO]\033[0m Cache and tmp cleared successfully."
+} || { # catch
+    # Handle failure to clear cache and tmp
+    echo -e "\033[1;31m[ERROR]\033[0m Failed to clear cache and tmp."
+    echo -e "\033[1;31m[ERROR]\033[0m Cache clearing skipped!"
+}
+
+{ # try
+    # Activate Python virtual environment
+    echo -e "\n\033[1;32m[INFO]\033[0m Activating Python virtual environment..."
+    source $PYTHON_ENV
+    echo -e "\033[1;32m[INFO]\033[0m Python virtual environment activated."
+
+    # Change to the main script directory
+    echo -e "\n\033[1;32m[INFO]\033[0m Changing directory to $MAIN_DIR..."
+    cd $MAIN_DIR
+    echo -e "\033[1;32m[INFO]\033[0m Directory changed to $MAIN_DIR."
+
+    # Run the Python script
+    echo -e "\n\033[1;32m[INFO]\033[0m Running the Python script $SCRIPT_NAME..."
+    python -W ignore $SCRIPT_PATH
+    echo -e "\033[1;32m[INFO]\033[0m Python script executed successfully at $(date)."
+} || { # catch
+    # Handle failure to run Python script
+    echo -e "\n\033[1;31m[ERROR]\033[0m Python script did not execute successfully."
+    echo -e "\033[1;31m[ERROR]\033[0m Script execution failed."
+    exit 1
+}
+
+# Final message indicating successful execution
+echo -e "\n========== $PROJECT - $SCRIPT COMPLETED SUCCESSFULLY =========="

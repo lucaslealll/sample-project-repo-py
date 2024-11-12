@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Função para listar versões de Python disponíveis
+list_python_versions() {
+  echo -e "Available Python versions:"
+  # Lista as versões de Python instaladas no sistema
+  versions=$(ls /usr/bin/python* | grep -E 'python[0-9]+\.[0-9]+' | sort -u)
+  i=1
+  for version in $versions; do
+    echo "  $i) $version"
+    ((i++))
+  done
+}
+
+# Função para criar um ambiente virtual com a versão selecionada
+create_virtualenv() {
+  local selected_version=$1
+  echo -e "Creating virtual environment [Python $selected_version]"
+
+  # Verificar se a versão do Python está instalada
+  if ! command -v $selected_version &>/dev/null; then
+    echo -e "\033[1;31m[ERROR]\033[0m Python $selected_version is not installed on your system."
+    exit 1
+  fi
+
+  # Cria o ambiente virtual
+  $selected_version -m venv .venv
+
+  if [ $? -eq 0 ]; then
+    echo -e "\033[1;32m[INFO]\033[0m Virtual environment created successfully [Python $selected_version]"
+  else
+    echo -e "\033[1;31m[ERROR]\033[0m Failed to create virtual environment."
+    exit 1
+  fi
+}
+
+# Função principal
+main() {
+  # Listar versões do Python disponíveis
+  list_python_versions
+
+  # Perguntar ao usuário qual versão do Python ele deseja usar
+  read -p "Enter the number of the desired Python version: " choice
+
+  # Obter a versão selecionada com base no número
+  selected_version=$(echo "$versions" | sed -n "${choice}p")
+
+  # Verificar se a versão selecionada existe
+  if [ -z "$selected_version" ]; then
+    echo -e "\033[1;31m[ERROR]\033[0m Invalid selection. Please select a valid version number."
+    exit 1
+  fi
+
+  # Criar o ambiente virtual com a versão escolhida
+  create_virtualenv $selected_version
+
+  # Ativar o ambiente virtual
+  echo -e "To activate the virtual environment, run the following command:"
+  echo -e "  \033[1;32msource .venv/bin/activate\033[0m"
+}
+
+# Executa a função principal
+main
